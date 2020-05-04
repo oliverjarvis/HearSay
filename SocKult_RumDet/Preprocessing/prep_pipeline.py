@@ -20,6 +20,8 @@ from keras.preprocessing.sequence import pad_sequences
 from create_features import get_feature_vector
 #%%
 
+embedding_dimension = 768
+
 def convert_label(label):
     if label == "true":
         return(0)
@@ -49,11 +51,11 @@ def prep_pipeline(dataset='RumEval2019', feature_set=['avgw2v']):
 
             thread_feature_dict = get_feature_vector(conversation)
 
-            thread_features_array, thread_stance_labels, branches = transform_feature_dict(
+            thread_features_array, branches = transform_feature_dict(
                                    thread_feature_dict, conversation,
                                    feature_set=feature_set)
-            
-            fold_stance_labels.extend(thread_stance_labels)
+            #thread_stance_labels, 
+            #fold_stance_labels.extend(thread_stance_labels)
             tweet_ids.extend(branches)
             feature_fold.extend(thread_features_array)
             for i in range(len(thread_features_array)):
@@ -67,20 +69,24 @@ def prep_pipeline(dataset='RumEval2019', feature_set=['avgw2v']):
                                          padding='post',
                                          truncating='post', value=0.)#feature_fold.shape = [rootnode, branches,]
     
-            fold_stance_labels = pad_sequences(fold_stance_labels, maxlen=None,
-                                               dtype='float32',
-                                               padding='post', truncating='post',
-                                               value=0.)
-
+            #fold_stance_labels = pad_sequences(fold_stance_labels, maxlen=None,
+            #                                   dtype='float32',
+            #                                   padding='post', truncating='post',
+            #                                   value=0.)
+            #one hot
             labels = np.asarray(labels)
             path_fold = os.path.join(path, fold)
             if not os.path.exists(path_fold):
                 os.makedirs(path_fold)
-    
-            np.save(os.path.join(path_fold, 'train_array'), feature_fold)
+
+            embeddings_array = feature_fold[:,:,:embedding_dimension]
+            feature_array = feature_fold[:,:,embedding_dimension:]
+
+            np.save(os.path.join(path_fold, 'embeddings_array'), embeddings_array)
+            np.save(os.path.join(path_fold, 'feature_array'), feature_array)
             np.save(os.path.join(path_fold, 'labels'), labels)
-            np.save(os.path.join(path_fold, 'fold_stance_labels'),
-                    fold_stance_labels)
+            #np.save(os.path.join(path_fold, 'fold_stance_labels'),
+            #        fold_stance_labels)
             np.save(os.path.join(path_fold, 'ids'), ids) 
             np.save(os.path.join(path_fold, 'tweet_ids'), tweet_ids)
       
@@ -97,7 +103,7 @@ def main(data ='RumEval2019', feats = 'SocKultfeatures'):
                            'Word2VecSimilarityWrtSource',
                            'Word2VecSimilarityWrtPrev']
     elif feats == 'SocKultfeatures':
-        features = ['SBERT-WK', 'issource'] #,'metadata]
+        features = ['SBERT-WK', 'issource', 'metadata']
     else:
         print("Features not supported")
         return

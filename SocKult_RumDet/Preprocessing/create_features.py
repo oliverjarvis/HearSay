@@ -8,8 +8,8 @@ import copy
 #from tree2branches import tree2branches
 
 # Loading the data
-source_tweets = "SocKult_RumDet/Preprocessing/data/twitter-english-source-clean-final.csv"
-reply_tweets = "SocKult_RumDet/Preprocessing/data/twitter-english-source-replies-clean-final.csv"
+source_tweets = "data/twitter-english-source-clean-final.csv"
+reply_tweets = "data/twitter-english-source-replies-clean-final.csv"
 
 source_df = pd.read_csv(source_tweets)
 reply_df = pd.read_csv(reply_tweets)
@@ -51,21 +51,24 @@ def preprocess(row, feature_dict):
     fd = copy.deepcopy(feature_dict)
     #function that normalizes the features
     for col in row:
+        if col == "id_str":
+            continue
         if col == "user.verified":
-            if row[col] == "True":
+            #print(row[col].values[0])
+            if row[col].values[0] == True:
                 fd[col] = 1
             else:
-                fd[col] == 0
+                fd[col] = 0
         else:
-            fd[col] == scale(row[col], col)
+            fd[col] = scale(row[col].values[0], col)
     return fd
 
 def metadata_for_tweet_id(tweet_id, tweet_type):
     source_file = ""
     if tweet_type == "source":
-        source_file = pd.read_csv(source_tweets, header=0)
+        source_file = pd.read_csv(source_tweets, dtype={'id_str': object}, header = 0, index_col = 0)
     elif tweet_type == "reply":
-        source_file = pd.read_csv(reply_tweets, header=0)
+        source_file = pd.read_csv(reply_tweets, dtype={'id_str': object}, header = 0, index_col = 0)
 
     try:
        row = source_file.loc[source_file['id_str'] == tweet_id]
@@ -76,12 +79,11 @@ def metadata_for_tweet_id(tweet_id, tweet_type):
     features = row.to_dict()  
     feature_dict = {}
     # features should really only output one row, but we'll extract them as a precaution
-    for k, v in features.items():
-        feature_dict[k] = v.values()[0]
+    #for k, v in features.items():
+    #    feature_dict[k] = v.values()[0]
     
     #preprocessing for meta data features
     feature_dict = preprocess(row, feature_dict)
-
     return feature_dict
 
 def get_feature_vector(conversation):
