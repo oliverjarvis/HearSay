@@ -50,7 +50,8 @@ def prep_pipeline(dataset='RumEval2019', feature_set=['avgw2v']):
         for conversation in folds[fold]:
 
             thread_feature_dict = get_feature_vector(conversation)
-
+            if thread_feature_dict == False:
+                continue
             thread_features_array, branches = transform_feature_dict(
                                    thread_feature_dict, conversation,
                                    feature_set=feature_set)

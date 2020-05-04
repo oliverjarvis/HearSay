@@ -11,8 +11,8 @@ import copy
 source_tweets = "data/twitter-english-source-clean-final.csv"
 reply_tweets = "data/twitter-english-source-replies-clean-final.csv"
 
-source_df = pd.read_csv(source_tweets)
-reply_df = pd.read_csv(reply_tweets)
+source_df = pd.read_csv(source_tweets, dtype={"id_str":object})
+reply_df = pd.read_csv(reply_tweets, dtype={"id_str":object})
 datasets_decription = source_df.append(reply_df).describe()
 
 Embedder = SBERT_WK_Embedding()
@@ -60,7 +60,12 @@ def preprocess(row, feature_dict):
             else:
                 fd[col] = 0
         else:
-            fd[col] = scale(row[col].values[0], col)
+            try:
+                fd[col] = scale(row[col].values[0], col)
+            except IndexError:
+                print("Oliver er en konge")
+            except:
+                print("We are in some deep shit")
     return fd
 
 def metadata_for_tweet_id(tweet_id, tweet_type):
@@ -91,6 +96,8 @@ def get_feature_vector(conversation):
     source = conversation['source']
     source_tweet = source['text']
     source_id = source['id_str']
+    if not source_df['id_str'].str.contains(source_id).any(): # Some of the tweets are not in the rehydrated data
+        return False
     source_features = {}
     source_features['SBERT-WK'] = SBERT_WK_Embedding().get_embeddings(source_tweet)
     source_features['metadata'] = metadata_for_tweet_id(tweet_id=source_id, tweet_type="source")
@@ -103,6 +110,8 @@ def get_feature_vector(conversation):
         feature_dict['issource'] = 0
         #This is where the embeddings are added 
         tweet_id = tw['id_str']
+        if not reply_df['id_str'].str.contains(tweet_id).any(): # Some of the tweets are not in the rehydrated data
+            continue
         feature_dict['SBERT-WK'] = Embedder.get_embeddings(tw['text'])
         feature_dict['metadata'] = metadata_for_tweet_id(tweet_id=tweet_id, tweet_type="reply")
         fullthread_featdict[tw['id_str']] = feature_dict
