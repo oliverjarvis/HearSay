@@ -12,4 +12,6 @@ hsenv
 /SocKult_RumDet/Preprocessing/data
 /SocKult_RumDet/Preprocessing/__pycache__
 /SocKult_RumDet/Preprocessing/saved_dataSocKult_RumDet
+/SocKult_RumDet/Preprocessing/Safebox
+
 /cache

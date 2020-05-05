@@ -66,13 +66,20 @@ def transform_feature_dict(thread_feature_dict, conversation, feature_set):
      
     return thread_features_array, clean_branches #thread_stance_labels, 
 
+feature_keys = []
+
 #%%
 def dict_to_array(feature_dict, feature_set):
-
+    global feature_keys
     tweet_rep = []
     for feature_name in feature_set:
         if type(feature_dict[feature_name]) == dict:
             for k in feature_dict[feature_name].keys():
+                if feature_keys == []:
+                    feature_keys = feature_dict[feature_name].keys()
+                else:
+                    if feature_keys != feature_dict[feature_name].keys():
+                        print("big doodoo")
                 if np.isscalar(feature_dict[feature_name][k]):
                     tweet_rep.append(feature_dict[feature_name][k])
                 else:
@@ -83,3 +90,12 @@ def dict_to_array(feature_dict, feature_set):
             else:
                 tweet_rep.extend(feature_dict[feature_name])
     return tweet_rep
+
+"""feature _keys = =  []""issource, ""favorite_cout
+                    nnt, ""retweet_cou
+                    nt, ""user.verifi
+                    ed, 
+                    "user.followers_count",
+                    "user.listed_count",
+                    "user.friends_count",
+                    "user.favourites_count"""
