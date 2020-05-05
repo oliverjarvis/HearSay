@@ -15,7 +15,7 @@ def parameter_search(ntrials, objective_function, task):
                                                                    300]),
                     'num_lstm_layers': hp.choice('num_lstm_layers', [1, 2]),
                     'learn_rate': hp.choice('learn_rate', [1e-4, 3e-4, 1e-3]),
-                    'mb_size': hp.choice('mb_size', [32, 64]),
+                    'mb_size': hp.choice('mb_size', [3]), #[32, 64]),
                     'l2reg': hp.choice('l2reg', [0.0, 1e-4, 3e-4, 1e-3]),
                     'rng_seed': hp.choice('rng_seed', [364])
                     }
