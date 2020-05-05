@@ -84,7 +84,7 @@ def prep_pipeline(dataset='RumEval2019', feature_set=['avgw2v']):
             feature_array = feature_fold[:,:,embedding_dimension:]
 
             np.save(os.path.join(path_fold, 'embeddings_array'), embeddings_array)
-            np.save(os.path.join(path_fold, 'feature_array'), feature_array)
+            np.save(os.path.join(path_fold, 'metafeatures_array'), feature_array)
             np.save(os.path.join(path_fold, 'labels'), labels)
             #np.save(os.path.join(path_fold, 'fold_stance_labels'),
             #        fold_stance_labels)

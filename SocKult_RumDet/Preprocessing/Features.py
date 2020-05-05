@@ -14,7 +14,7 @@ def FeatureFetch(func):
         #loops through the tweet_ids and fetches the data for each
         branch = args[0]
         ids = []
-        for id in branach:
+        for id in branch:
             ids.append(get_data_for_tweet_id(id))
         return func(ids)
     return wrapper
@@ -36,7 +36,7 @@ Embedder = SBERT_WK_Embedding()
 def embeddings(branch):
     embeddings = []
     for tweet in branch:
-        embedding = SBERT_WK_Embedding().get_embeddings(source_tweet)
+        embedding = SBERT_WK_Embedding().get_embeddings(tweet['txt'])
         embeddings.append(np.asarray(embedding))
     return np.asarray(embeddings)
 
@@ -47,7 +47,7 @@ def cosine_similarity(branch):
     for tweet_id in range(1, len(branch)):
         cosine = SBERT_WK_Embedding().get_cosine(branch[0], branch[tweet_id])
         cosine_similarity.append(np.asarray([cosine]))
-    return return np.asarray(cosine_similarity)
+    return np.asarray(cosine_similarity)
 
 @FeatureFetch
 def column_features(branch):

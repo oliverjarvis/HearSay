@@ -24,7 +24,7 @@ def feature_vectors_for_branch(branch, features):
         feature_vector = np.concatenate((feature_vector, f_vec), axis=1)
     return np.asarray(feature_vector)
 
-def prep_pipeline(dataset='RumEval2019', feature_set):
+def prep_pipeline(dataset, feature_set):
     #regular old start
     path = 'saved_data'+dataset
     folds = {}
@@ -42,7 +42,7 @@ def prep_pipeline(dataset='RumEval2019', feature_set):
         for conversation in folds[fold]:
             branches = conversation['branches']
             for branch in branches:
-                branch_features = feature_feature_vectors_for_branch(branch, feature_set) #should output (branches, branch_length, feature_size)
+                branch_features = feature_vectors_for_branch(branch, feature_set) #should output (branches, branch_length, feature_size)
                 feature_fold.append(branch_features)
                 #concatenate feature_fold with output of above function
 
@@ -76,7 +76,7 @@ def prep_pipeline(dataset='RumEval2019', feature_set):
             np.save(os.path.join(path_fold, 'ids'), ids) 
             np.save(os.path.join(path_fold, 'tweet_ids'), tweet_ids)
       
-def main(data ='RumEval2019'):
+def main():
     features = [
         Features.embeddings,
         Features.column_features
