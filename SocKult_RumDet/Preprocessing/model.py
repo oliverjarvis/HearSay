@@ -98,38 +98,3 @@ def LSTM_model_veracity(x_train_embeddings, x_train_metafeatures, y_train, x_tes
     return Y_pred, confidence
 
 
-    # %%
-def get_model_plot():
-    emb_shape = (14, 768)
-    metafeatures_shape = (14, 12)
-    # Creating the two inputs
-    emb_input = Input(shape = emb_shape)
-    metafeatures_input = Input(shape = metafeatures_shape)
-
-    # Adding masks to account for zero paddings
-    emb_mask = (Masking(mask_value=0., input_shape=(None, emb_shape)))(emb_input)
-    metafeatures_mask = (Masking(mask_value=0., input_shape=(None, metafeatures_shape)))(metafeatures_input)
-
-    emb_LSTM = (LSTM(128, dropout=0.2, recurrent_dropout=0.2,
-                        return_sequences=True))(emb_mask)
-    metafeatures_LSTM = (LSTM(128, dropout=0.2, recurrent_dropout=0.2,
-                        return_sequences=True))(metafeatures_mask)
-
-    model = Concatenate()([emb_LSTM, metafeatures_LSTM])
-
-    model = (LSTM(128, dropout=0.2, recurrent_dropout=0.2,
-                        return_sequences=False))(model)
-    
-    model = Dense(10, activation='relu')(model)
-    model = Dropout(0.5)(model)
-    output = Dense(3, activation='softmax')(model)
-    model = Model(inputs=[emb_input, metafeatures_input], outputs=output)
-
-
-    return plot_model(model, to_file='model_plot.png', show_shapes=True, show_layer_names=True)
-
-
-# %%
-get_model_plot()
-
-# %%
