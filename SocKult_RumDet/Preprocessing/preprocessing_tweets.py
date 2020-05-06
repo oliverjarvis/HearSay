@@ -167,5 +167,22 @@ def load_dataset():
                 
         cvfolds[fold] = allconv
         allconv = []
-
+    for k, v in train_dev_split.items():
+        for conversation in v:
+            new_branches = []
+            for branch in conversation['branches']:
+                branch_tweets = []
+                for reply in branch:
+                    tweet = get_tweet_for_id(conversation['replies'], reply)
+                    if tweet == None:
+                        branch_tweets.append(conversation['source'])
+                    else:
+                        branch_tweets.append(tweet)
+                new_branches.append(branch_tweets)
+            conversation['branches'] = new_branches
     return train_dev_split
+
+def get_tweet_for_id(replies, id_str):
+    for r in replies:
+        if r['id_str'] == id_str:
+            return r

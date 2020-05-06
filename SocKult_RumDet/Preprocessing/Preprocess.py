@@ -4,8 +4,10 @@ import help_prep_functions
 import numpy as np
 import os
 from keras.preprocessing.sequence import pad_sequences
-from create_features import get_feature_vector
+#from create_features import get_feature_vector
 import Features
+
+embedding_dimension = 768
 
 def convert_label(label):
     if label == "true":
@@ -38,50 +40,49 @@ def prep_pipeline(dataset, feature_set):
         fold_stance_labels = []
         labels = []
         ids = []
-
+        
         for conversation in folds[fold]:
             branches = conversation['branches']
             for branch in branches:
+                temp_ids = []
                 branch_features = feature_vectors_for_branch(branch, feature_set) #should output (branches, branch_length, feature_size)
                 feature_fold.append(branch_features)
-                #concatenate feature_fold with output of above function
-
-            #tweet_ids.extend(branches)
-            #feature_fold.extend(thread_features_array)
-            #for i in range(len(thread_features_array)):
-            #    labels.append(convert_label(conversation['veracity']))
-            #    ids.append(conversation['id'])
+                for tweet in branch:
+                    temp_ids.append(tweet['id_str'])
+                tweet_ids.append(temp_ids)
+                labels.append(convert_label(conversation['veracity']))
         
         #convert the whole thing to a numpy array
         feature_fold = np.asarray(feature_fold)
 
         if feature_fold!=[]:
 
-            feature_fold = pad_sequences(feature_fold, maxlen=None,
+            feature_fold = pad_sequences(feature_fold, maxlen=25,
                                          dtype='float32',
                                          padding='post',
                                          truncating='post', value=0.)#feature_fold.shape = [rootnode, branches,]
-
-            #labels = np.asarray(labels)
-            #path_fold = os.path.join(path, fold)
-            #if not os.path.exists(path_fold):
-            #    os.makedirs(path_fold)
+            tweet_ids = np.asarray(tweet_ids)
+            labels = np.asarray(labels)
+            path_fold = os.path.join(path, fold)
+            if not os.path.exists(path_fold):
+                os.makedirs(path_fold)
 
             embeddings_array = feature_fold[:,:,:embedding_dimension]
-            feature_array = feature_fold[:,:,embedding_dimension:]
+            metafeatures_array = feature_fold[:,:,embedding_dimension:]
 
             np.save(os.path.join(path_fold, 'embeddings_array'), embeddings_array)
-            np.save(os.path.join(path_fold, 'feature_array'), feature_array)
+            np.save(os.path.join(path_fold, 'metafeatures_array'), metafeatures_array)
             np.save(os.path.join(path_fold, 'labels'), labels)
-            np.save(os.path.join(path_fold, 'ids'), ids) 
+            #np.save(os.path.join(path_fold, 'ids'), ids) 
             np.save(os.path.join(path_fold, 'tweet_ids'), tweet_ids)
       
-def main():
+def main(data ='RumEval2019'):
     features = [
         Features.embeddings,
-        Features.column_features
+        Features.column_features,
+        Features.one_hot_stance
     ]
-    prep_pipeline(dataset='SocKult_RumDet', feature_set=features)
+    prep_pipeline(dataset='newdata', feature_set=features)
 
 if __name__ == '__main__':
     main()
