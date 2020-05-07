@@ -1,7 +1,7 @@
 pandas
 numpy
 nltk
-torch
+pytorch
 transformers
 sklearn
 gensim

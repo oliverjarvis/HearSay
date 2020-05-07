@@ -63,7 +63,7 @@ def LSTM_model_veracity(x_train_embeddings, x_train_metafeatures, y_train, x_tes
     model = Model(inputs=[emb_input, metafeatures_input], outputs=output)
 
     # Plotting the model 
-    plot_model(model, to_file='model_plot.png', show_shapes=True, show_layer_names=True)
+    #plot_model(model, to_file='model_plot.png', show_shapes=True, show_layer_names=True)
 
     # Adding Adam optimizer with varying learning rate using parameter search
     adam = optimizers.Adam(lr=learn_rate, beta_1=0.9, beta_2=0.999,
@@ -77,7 +77,7 @@ def LSTM_model_veracity(x_train_embeddings, x_train_metafeatures, y_train, x_tes
     # Fitting the model with varying batch sizes and epochs using parameter search
     model.fit({'Embeddings': x_train_embeddings, 'Metafeatures': x_train_metafeatures}, y_train,
               batch_size=mb_size,
-              epochs=num_epochs, shuffle=True, class_weight=None, verbose=0)
+              epochs=num_epochs, shuffle=True, class_weight=None, verbose=1)
     
     # Evaluation time
     if eval==True:
@@ -89,7 +89,7 @@ def LSTM_model_veracity(x_train_embeddings, x_train_metafeatures, y_train, x_tes
         model.save_weights('output/model_veracity_weights.h5')
 
     # Getting confidence of the model
-    pred_probabilities = model.predict([x_test_embeddings, x_test_metafeatures], batch_size=mb_size, verbose=0)
+    pred_probabilities = model.predict([x_test_embeddings, x_test_metafeatures], batch_size=mb_size, verbose=1)
     confidence = np.max(pred_probabilities, axis=1)
 
     # Getting predictions of the model
