@@ -15,7 +15,7 @@ from keras.preprocessing.sequence import pad_sequences
 def objective_function_veracity_branchLSTM(params):
     # Loading training features  
     x_train_embeddings = np.load("C:\\Users\\sysadmin\\Downloads\\HearSay\\SocKult_RumDet\\Preprocessing\\sacred-twitter-data-w-test\\train\\embeddings_array.npy")
-    x_train_metafeatures = np.load("C:\\Users\\sysadmin\\Downloads\\HearSay\\SocKult_RumDet\\Preprocessing\\sacred-twitter-data-w-test\\train\\metafeatures_array.npy")
+    x_train_metafeatures = np.load("C:\\Users\\sysadmin\\Downloads\\HearSay\\SocKult_RumDet\\Preprocessing\\sacred-twitter-data-w-test\\train\\feature_array.npy")
 
     # Loading the veracity of the tweets True = 0, False = 1, Unverified = 2
     y_train =  np.load("C:\\Users\\sysadmin\\Downloads\\HearSay\\SocKult_RumDet\\Preprocessing\\sacred-twitter-data-w-test\\train\\labels.npy")
@@ -27,7 +27,7 @@ def objective_function_veracity_branchLSTM(params):
 
     # Loading the dev features (even though we still call it test, might change)
     x_test_embeddings =  np.load("C:\\Users\\sysadmin\\Downloads\\HearSay\\SocKult_RumDet\\Preprocessing\\sacred-twitter-data-w-test\\dev\\embeddings_array.npy")
-    x_test_metafeatures = np.load("C:\\Users\\sysadmin\\Downloads\\HearSay\\SocKult_RumDet\\Preprocessing\\sacred-twitter-data-w-test\\dev\\metafeatures_array.npy")
+    x_test_metafeatures = np.load("C:\\Users\\sysadmin\\Downloads\\HearSay\\SocKult_RumDet\\Preprocessing\\sacred-twitter-data-w-test\\dev\\feature_array.npy")
 
     # Loading the veracity of the dev set
     y_test =  np.load("C:\\Users\\sysadmin\\Downloads\\HearSay\\SocKult_RumDet\\Preprocessing\\sacred-twitter-data-w-test\\dev\\labels.npy")

@@ -98,7 +98,7 @@ def LSTM_model_veracity(x_train_embeddings, x_train_metafeatures, y_train, x_tes
     # Fitting the model with varying batch sizes and epochs using parameter search
     model.fit({'Embeddings': x_train_embeddings, 'Metafeatures': x_train_metafeatures}, y_train,
               batch_size=mb_size,
-              epochs=num_epochs, shuffle=True, class_weight=None, verbose=0)
+              epochs=num_epochs, shuffle=True, class_weight=None, verbose=1)
     
     # Evaluation time
     if eval==True:
@@ -110,7 +110,7 @@ def LSTM_model_veracity(x_train_embeddings, x_train_metafeatures, y_train, x_tes
         model.save_weights('output\\model_veracity_weights.h5')
 
     # Getting confidence of the model
-    pred_probabilities = model.predict([x_test_embeddings, x_test_metafeatures], batch_size=mb_size, verbose=0)
+    pred_probabilities = model.predict([x_test_embeddings, x_test_metafeatures], batch_size=mb_size, verbose=1)
     confidence = np.max(pred_probabilities, axis=1)
 
     # Getting predictions of the model

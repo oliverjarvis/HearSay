@@ -6,7 +6,7 @@ from parameter_search import parameter_search
 from objective_functions import objective_function_veracity_branchLSTM
 from evaluation_functions import evaluation_function_veracity_branchLSTM
 import json
-
+import pickle
 from sklearn.metrics import f1_score, accuracy_score
 
 #%%
@@ -43,7 +43,7 @@ def convertsave_competitionformat(idsB, predictionsB, confidenceB):
 print ('Rumour Veracity classification') 
 ntrials = 100
 task = 'veracity'
-paramsB, trialsB = parameter_search(ntrials, objective_function_veracity_branchLSTM, task)
+#paramsB, trialsB = parameter_search(ntrials, objective_function_veracity_branchLSTM, task)
 
 
 #Hyperparameters
@@ -61,22 +61,29 @@ paramsB, trialsB = parameter_search(ntrials, objective_function_veracity_branchL
 #output = objective_function_veracity_branchLSTM(search_space)
 
 #%%
-best_trial_idB = trialsB.best_trial["tid"]
-best_trial_lossB = trialsB.best_trial["result"]["loss"]
-dev_result_idB = trialsB.attachments["ATTACH::%d::ID" % best_trial_idB]
-dev_result_predictionsB = trialsB.attachments["ATTACH::%d::Predictions" % best_trial_idB]
-dev_result_labelB = trialsB.attachments["ATTACH::%d::Labels" % best_trial_idB]
-confidenceB = [1.0 for i in range((len(dev_result_predictionsB)))]
+#best_trial_idB = trialsB.best_trial["tid"]
+#best_trial_lossB = trialsB.best_trial["result"]["loss"]
+#dev_result_idB = trialsB.attachments["ATTACH::%d::ID" % best_trial_idB]
+#dev_result_predictionsB = trialsB.attachments["ATTACH::%d::Predictions" % best_trial_idB]
+#dev_result_labelB = trialsB.attachments["ATTACH::%d::Labels" % best_trial_idB]
+#confidenceB = [1.0 for i in range((len(dev_result_predictionsB)))]
 
-print(accuracy_score(dev_result_labelB,dev_result_predictionsB))
-print(f1_score(dev_result_labelB,dev_result_predictionsB,average='macro'))
-
-#%%
-#test_result_idB, test_result_predictionsB, confidenceB  = evaluation_function_veracity_branchLSTM(paramsB)
-
-#confidenceB = [1.0 for i in range((len(test_result_predictionsB)))]
+#print(accuracy_score(dev_result_labelB,dev_result_predictionsB))
+#print(f1_score(dev_result_labelB,dev_result_predictionsB,average='macro'))
 
 #%%
-a = convertsave_competitionformat(dev_result_idB, dev_result_predictionsB, confidenceB)
+fmin_trial = pickle.load(open("C:\\Users\\sysadmin\\Downloads\\HearSay\\SocKult_RumDet\\Preprocessing\\output\\trials_veracity.txt", "rb"))
+paramsB = fmin_trial.best_trial['result']['Params']
 
-#a = convertsave_competitionformat(test_result_id, test_result_predictions, test_result_idB, test_result_predictionsB,confidenceB )
+
+test_result_idB, test_result_predictionsB, confidenceB  = evaluation_function_veracity_branchLSTM(paramsB)
+
+confidenceB = [1.0 for i in range((len(test_result_predictionsB)))]
+
+#print(accuracy_score(test_result_labelB,test_result_predictionsB))
+#print(f1_score(test_result_labelB,test_result_predictionsB,average='macro'))
+
+#%%
+#a = convertsave_competitionformat(dev_result_idB, dev_result_predictionsB, confidenceB)
+
+b = convertsave_competitionformat(test_result_idB, test_result_predictionsB,confidenceB )
