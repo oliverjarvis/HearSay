@@ -8,16 +8,17 @@ import numpy
 def parameter_search(ntrials, objective_function, task):
 
     search_space = {'num_dense_layers': hp.choice('nlayers', [1, 2]),
-                    'num_dense_units': hp.choice('num_dense', [200, 300,
-                                                               400, 500]),
-                    'num_epochs': hp.choice('num_epochs',  [100, 200]),
+                    'num_dense_units': hp.choice('num_dense', [200, 300, 400, 500]),
+                    'num_epochs': hp.choice('num_epochs',  [32, 64, 128]),
                     'num_lstm_units': hp.choice('num_lstm_units', [100, 200,
                                                                    300]),
                     'num_lstm_layers': hp.choice('num_lstm_layers', [1, 2]),
                     'learn_rate': hp.choice('learn_rate', [1e-4, 3e-4, 1e-3]),
-                    'mb_size': hp.choice('mb_size', [32, 64]),
+                    'mb_size': hp.choice('mb_size', [128, 264]),
                     'l2reg': hp.choice('l2reg', [0.0, 1e-4, 3e-4, 1e-3]),
-                    'rng_seed': hp.choice('rng_seed', [364])
+                    'dropout': hp.choice('dropout', [0.2, 0.3, 0.4, 0.4]),
+                    'rng_seed': hp.choice('rng_seed', [364]),
+                    'attention': hp.choice('attention', [0, 1])
                     }
     
     trials = Trials()
@@ -33,11 +34,11 @@ def parameter_search(ntrials, objective_function, task):
     
     bp = trials.best_trial['result']['Params']
     
-    f = open('output/trials_'+task+'.txt', "wb")
+    f = open("C:\\Users\\sysadmin\\Downloads\\HearSay\\SocKult_RumDet\\Preprocessing\\output\\trials_"+task+".txt", "wb+")
     pickle.dump(trials, f)
     f.close()
     
-    filename = 'output/bestparams_'+task+'.txt'
+    filename = "C:\\Users\\sysadmin\\Downloads\\HearSay\\SocKult_RumDet\\Preprocessing\\output\\bestparams_"+task+".txt"
     f = open(filename, "wb")
     pickle.dump(bp, f)
     f.close()

@@ -7,9 +7,6 @@ from objective_functions import objective_function_veracity_branchLSTM
 from evaluation_functions import evaluation_function_veracity_branchLSTM
 import json
 
-import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-
 from sklearn.metrics import f1_score, accuracy_score
 
 #%%
@@ -38,7 +35,7 @@ def convertsave_competitionformat(idsB, predictionsB, confidenceB):
     answer = {}
     answer['subtaskbenglish'] = subtaskbenglish
     
-    with open("output/answer.json", 'w') as f:
+    with open("C:\\Users\\sysadmin\\Downloads\\HearSay\\SocKult_RumDet\\Preprocessing\\output\\answer.json", 'w') as f:
         json.dump(answer, f)
         
     return answer
@@ -66,9 +63,9 @@ paramsB, trialsB = parameter_search(ntrials, objective_function_veracity_branchL
 #%%
 best_trial_idB = trialsB.best_trial["tid"]
 best_trial_lossB = trialsB.best_trial["result"]["loss"]
-dev_result_idB = trialsB.attachments["ATTACH::%d::ID" % best_trial_id]
-dev_result_predictionsB = trialsB.attachments["ATTACH::%d::Predictions" % best_trial_id]
-dev_result_labelB = trialsB.attachments["ATTACH::%d::Labels" % best_trial_id]
+dev_result_idB = trialsB.attachments["ATTACH::%d::ID" % best_trial_idB]
+dev_result_predictionsB = trialsB.attachments["ATTACH::%d::Predictions" % best_trial_idB]
+dev_result_labelB = trialsB.attachments["ATTACH::%d::Labels" % best_trial_idB]
 confidenceB = [1.0 for i in range((len(dev_result_predictionsB)))]
 
 print(accuracy_score(dev_result_labelB,dev_result_predictionsB))
@@ -80,6 +77,6 @@ print(f1_score(dev_result_labelB,dev_result_predictionsB,average='macro'))
 #confidenceB = [1.0 for i in range((len(test_result_predictionsB)))]
 
 #%%
-a = convertsave_competitionformat(dev_result_id, dev_result_predictions, dev_result_idB, dev_result_predictionsB,confidenceB )
+a = convertsave_competitionformat(dev_result_idB, dev_result_predictionsB, confidenceB)
 
 #a = convertsave_competitionformat(test_result_id, test_result_predictions, test_result_idB, test_result_predictionsB,confidenceB )

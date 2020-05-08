@@ -3,12 +3,14 @@ Contains function that defines the model architecture
 """
 import numpy as np
 from tensorflow.keras.models import Model
-from tensorflow.keras.layers import Input, Dense, Dropout, LSTM
+from tensorflow.keras.layers import Input, Dense, Dropout, LSTM, AdditiveAttention
 from tensorflow.keras.layers import TimeDistributed, Masking
 from tensorflow.keras.layers import Concatenate
 from tensorflow.keras import optimizers
 from tensorflow.keras import regularizers
 from tensorflow.keras.utils import plot_model
+
+import json
 
 #%%
 def LSTM_model_veracity(x_train_embeddings, x_train_metafeatures, y_train, x_test_embeddings, x_test_metafeatures, params,eval=False ):
@@ -21,6 +23,8 @@ def LSTM_model_veracity(x_train_embeddings, x_train_metafeatures, y_train, x_tes
     learn_rate = params['learn_rate']
     mb_size = params['mb_size']
     l2reg = params['l2reg']
+    dropout = params['dropout']
+    attention = params['attention']
 
     # Defining input shapes
     emb_shape = x_train_embeddings[0].shape
@@ -34,25 +38,42 @@ def LSTM_model_veracity(x_train_embeddings, x_train_metafeatures, y_train, x_tes
     emb_mask = Masking(mask_value=0., input_shape=(None, emb_shape))(emb_input)
     metafeatures_mask = (Masking(mask_value=0., input_shape=(None, metafeatures_shape)))(metafeatures_input)
 
-    # Adding LSTM layers with varying layers and units using parameter search
-    for nl in range(num_lstm_layers):
-        emb_LSTM = LSTM(num_lstm_units, dropout=0.2, recurrent_dropout=0.2,
-                       return_sequences=True)(emb_mask)
-        metafeatures_LSTM = LSTM(num_lstm_units, dropout=0.2, recurrent_dropout=0.2,
-                       return_sequences=True)(metafeatures_mask)
+    # Adding attention and LSTM layers with varying layers and units using parameter search            
+    if attention == 1:
+        for nl in range(num_lstm_layers):
+            emb_LSTM_query = LSTM(num_lstm_units, dropout=dropout, recurrent_dropout=dropout,
+                        return_sequences=True)(emb_mask)
+            emb_LSTM_value = LSTM(num_lstm_units, dropout=dropout, recurrent_dropout=dropout,
+                        return_sequences=True)(emb_mask)
+            metafeatures_LSTM_query = LSTM(num_lstm_units, dropout=dropout, recurrent_dropout=dropout,
+                            return_sequences=True)(metafeatures_mask)
+            metafeatures_LSTM_value = LSTM(num_lstm_units, dropout=dropout, recurrent_dropout=dropout,
+                            return_sequences=True)(metafeatures_mask)
+        emb_LSTM = AdditiveAttention(name = 'Attention_Embeddings')([emb_LSTM_query, emb_LSTM_value])
+        metafeatures_LSTM = AdditiveAttention(name = 'Attention_Metafeatures')([metafeatures_LSTM_query, metafeatures_LSTM_value])
+    else:
+        emb_LSTM = LSTM(num_lstm_units, dropout=dropout, recurrent_dropout=dropout,
+                        return_sequences=True)(emb_mask)
+        metafeatures_LSTM = LSTM(num_lstm_units, dropout=dropout, recurrent_dropout=dropout,
+                            return_sequences=True)(metafeatures_mask)
     
     # Concatenating the two inputs
     model = Concatenate()([emb_LSTM, metafeatures_LSTM])
 
-    # Adding another LSTM to the concatenated layers
-    model = LSTM(num_lstm_units, dropout=0.2, recurrent_dropout=0.2, return_sequences=False)(model)
+    # Adding attention and another LSTM to the concatenated layers
+    if attention == 1:
+        model_query = LSTM(num_lstm_units, dropout=dropout, recurrent_dropout=0.2, return_sequences=False)(model)
+        model_value = LSTM(num_lstm_units, dropout=dropout, recurrent_dropout=0.2, return_sequences=False)(model)
+        model = AdditiveAttention(name = 'Attention_Model')([model_query, model_value])
+    else:
+        model = LSTM(num_lstm_units, dropout=dropout, recurrent_dropout=0.2, return_sequences=False)(model)    
 
     # Adding dense layer with varying layers and units using parameter search
     for nl in range(num_dense_layers):
         model = Dense(num_dense_units, activation='relu')(model)
 
     # Adding dropout of 50% to the model
-    model = Dropout(0.5)(model)
+    model = Dropout(dropout)(model)
 
     # Adding softmax dense layer with varying l2 regularizers using parameter search
     output = Dense(3, activation='softmax',
@@ -77,19 +98,19 @@ def LSTM_model_veracity(x_train_embeddings, x_train_metafeatures, y_train, x_tes
     # Fitting the model with varying batch sizes and epochs using parameter search
     model.fit({'Embeddings': x_train_embeddings, 'Metafeatures': x_train_metafeatures}, y_train,
               batch_size=mb_size,
-              epochs=num_epochs, shuffle=True, class_weight=None, verbose=1)
+              epochs=num_epochs, shuffle=True, class_weight=None, verbose=0)
     
     # Evaluation time
     if eval==True:
 
-        model.save('output/model_veracity.h5')
+        model.save('output\\model_veracity.h5')
         json_string = model.to_json()
-        with open('output/model_architecture_veracity.json','w') as fout:
+        with open('output\\model_architecture_veracity.json','w') as fout:
             json.dump(json_string,fout)
-        model.save_weights('output/model_veracity_weights.h5')
+        model.save_weights('output\\model_veracity_weights.h5')
 
     # Getting confidence of the model
-    pred_probabilities = model.predict([x_test_embeddings, x_test_metafeatures], batch_size=mb_size, verbose=1)
+    pred_probabilities = model.predict([x_test_embeddings, x_test_metafeatures], batch_size=mb_size, verbose=0)
     confidence = np.max(pred_probabilities, axis=1)
 
     # Getting predictions of the model
