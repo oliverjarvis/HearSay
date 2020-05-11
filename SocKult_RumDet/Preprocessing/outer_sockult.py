@@ -1,7 +1,3 @@
-from numpy.random import seed
-seed(364)
-import tensorflow as tf
-tf.random.set_seed(364)
 from parameter_search import parameter_search
 from objective_functions import objective_function_veracity_branchLSTM
 from evaluation_functions import evaluation_function_veracity_branchLSTM
@@ -43,22 +39,22 @@ def convertsave_competitionformat(idsB, predictionsB, confidenceB):
 print ('Rumour Veracity classification') 
 ntrials = 100
 task = 'veracity'
-#paramsB, trialsB = parameter_search(ntrials, objective_function_veracity_branchLSTM, task)
+paramsB, trialsB = parameter_search(ntrials, objective_function_veracity_branchLSTM, task)
 
 
-#Hyperparameters
-#search_space = {'num_dense_layers':1,
-#                'num_dense_units':200,
-#                'num_epochs': 100,
-#                'num_lstm_units': 100,
-#                'num_lstm_layers': 1,
-#                'learn_rate':1e-4,
-#                'mb_size': 128,
-#                'l2reg': 1e-3,
-#                'rng_seed': 364
-#                }
+Hyperparameters
+search_space = {'num_dense_layers':1,
+                'num_dense_units':200,
+                'num_epochs': 100,
+                'num_lstm_units': 100,
+                'num_lstm_layers': 1,
+                'learn_rate':1e-4,
+                'mb_size': 128,
+                'l2reg': 1e-3,
+                'rng_seed': 364
+                }
 
-#output = objective_function_veracity_branchLSTM(search_space)
+output = objective_function_veracity_branchLSTM(search_space)
 
 #%%
 #best_trial_idB = trialsB.best_trial["tid"]
@@ -74,11 +70,23 @@ task = 'veracity'
 #%%
 fmin_trial = pickle.load(open("C:\\Users\\sysadmin\\Downloads\\HearSay\\SocKult_RumDet\\Preprocessing\\output\\trials_veracity.txt", "rb"))
 paramsB = fmin_trial.best_trial['result']['Params']
-paramsB['attention'] = 0
+
 paramsB['num_epochs'] = 32
 
 
-test_result_idB, test_result_predictionsB, confidenceB, mactest_F  = evaluation_function_veracity_branchLSTM(paramsB)
+metafeatures_combinations = [
+    ["cosine_similarity", "user_information"],
+    ["cosine_similarity", "social_interest"],
+    ["cosine_similarity", "social_interest", "user_information"],
+    ["cosine_similarity", "social_interest", "user_information", "stance"]
+]
+
+for metac in metafeatures_combinations:
+    test_result_idB, test_result_predictionsB, confidenceB, mactest_F  = evaluation_function_veracity_branchLSTM(paramsB, metac)
+    print("With combination: ", metac, ":", sep=" ")
+    print("F1: {}".format(mactest_F))
+    print("")
+    
 
 #confidenceB = [1.0 for i in range((len(test_result_predictionsB)))]
 

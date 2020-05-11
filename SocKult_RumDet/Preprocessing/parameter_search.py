@@ -8,16 +8,15 @@ import numpy
 def parameter_search(ntrials, objective_function, task):
 
     search_space = {'num_dense_layers': hp.choice('nlayers', [1, 2]),
-                    'num_dense_units': hp.choice('num_dense', [200, 300, 400, 500]),
-                    'num_epochs': hp.choice('num_epochs',  [32, 64, 128]),
+                    'num_dense_units': hp.choice('num_dense', [200, 300, 400]),
+                    'num_epochs': hp.choice('num_epochs',  [32, 64]),
                     'num_lstm_units': hp.choice('num_lstm_units', [100, 200,
                                                                    300]),
-                    'num_lstm_layers': hp.choice('num_lstm_layers', [1, 2]),
-                    'learn_rate': hp.choice('learn_rate', [1e-4, 3e-4, 1e-3]),
+                    'num_lstm_layers': hp.choice('num_lstm_layers', [1, 2, 3]),
+                    'learn_rate': hp.choice('learn_rate', [1e-4, 3e-4, 1e-3, 3e-2]),
                     'mb_size': hp.choice('mb_size', [128, 264]),
                     'l2reg': hp.choice('l2reg', [0.0, 1e-4, 3e-4, 1e-3]),
-                    'dropout': hp.choice('dropout', [0.2, 0.3, 0.4, 0.4]),
-                    'rng_seed': hp.choice('rng_seed', [364]),
+                    'dropout': hp.choice('dropout', [0.2, 0.3, 0.4, 0.5]),
                     'attention': hp.choice('attention', [0, 1])
                     }
     
@@ -27,7 +26,7 @@ def parameter_search(ntrials, objective_function, task):
                 algo=tpe.suggest,
                 max_evals=ntrials,
                 trials=trials,
-                rstate=numpy.random.RandomState(364))
+                rstate=numpy.random.RandomState(1))
     
     
     print(best)
