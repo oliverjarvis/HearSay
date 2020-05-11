@@ -74,15 +74,17 @@ task = 'veracity'
 #%%
 fmin_trial = pickle.load(open("C:\\Users\\sysadmin\\Downloads\\HearSay\\SocKult_RumDet\\Preprocessing\\output\\trials_veracity.txt", "rb"))
 paramsB = fmin_trial.best_trial['result']['Params']
+paramsB['attention'] = 0
+paramsB['num_epochs'] = 32
 
 
-test_result_idB, test_result_predictionsB, confidenceB  = evaluation_function_veracity_branchLSTM(paramsB)
+test_result_idB, test_result_predictionsB, confidenceB, mactest_F  = evaluation_function_veracity_branchLSTM(paramsB)
 
-confidenceB = [1.0 for i in range((len(test_result_predictionsB)))]
+#confidenceB = [1.0 for i in range((len(test_result_predictionsB)))]
 
 #print(accuracy_score(test_result_labelB,test_result_predictionsB))
-#print(f1_score(test_result_labelB,test_result_predictionsB,average='macro'))
 
+print(mactest_F)
 #%%
 #a = convertsave_competitionformat(dev_result_idB, dev_result_predictionsB, confidenceB)
 
