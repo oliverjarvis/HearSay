@@ -89,7 +89,7 @@ def evaluation_function_veracity_branchLSTM(params, metac):
     
     mactest_F = f1_score(tree_label, tree_prediction, average='macro')
             
-    return trees, tree_prediction, tree_confidence, mactest_F
+    return trees, tree_prediction, tree_label, tree_confidence, mactest_F
 
 
 

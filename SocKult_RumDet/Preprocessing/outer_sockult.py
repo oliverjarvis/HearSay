@@ -37,62 +37,49 @@ def convertsave_competitionformat(idsB, predictionsB, confidenceB):
     return answer
 #%%
 print ('Rumour Veracity classification') 
-ntrials = 100
+#ntrials = 100
 task = 'veracity'
-paramsB, trialsB = parameter_search(ntrials, objective_function_veracity_branchLSTM, task)
-
-
-Hyperparameters
-search_space = {'num_dense_layers':1,
-                'num_dense_units':200,
-                'num_epochs': 100,
-                'num_lstm_units': 100,
-                'num_lstm_layers': 1,
-                'learn_rate':1e-4,
-                'mb_size': 128,
-                'l2reg': 1e-3,
-                'rng_seed': 364
-                }
-
-output = objective_function_veracity_branchLSTM(search_space)
+#paramsB, trialsB = parameter_search(ntrials, objective_function_veracity_branchLSTM, task)
 
 #%%
-#best_trial_idB = trialsB.best_trial["tid"]
-#best_trial_lossB = trialsB.best_trial["result"]["loss"]
-#dev_result_idB = trialsB.attachments["ATTACH::%d::ID" % best_trial_idB]
-#dev_result_predictionsB = trialsB.attachments["ATTACH::%d::Predictions" % best_trial_idB]
-#dev_result_labelB = trialsB.attachments["ATTACH::%d::Labels" % best_trial_idB]
-#confidenceB = [1.0 for i in range((len(dev_result_predictionsB)))]
+trialsB = pickle.load(open("C:\\Users\\sysadmin\\Downloads\\HearSay\\SocKult_RumDet\\Preprocessing\\output\\trials2_veracity.txt", "rb"))
+paramsB = pickle.load(open("C:\\Users\\sysadmin\\Downloads\\HearSay\\SocKult_RumDet\\Preprocessing\\output\\bestparams2_veracity.txt", "rb"))
 
-#print(accuracy_score(dev_result_labelB,dev_result_predictionsB))
-#print(f1_score(dev_result_labelB,dev_result_predictionsB,average='macro'))
+best_trial_idB = trialsB.best_trial["tid"]
+best_trial_lossB = trialsB.best_trial["result"]["loss"]
+dev_result_idB = trialsB.attachments["ATTACH::%d::ID" % best_trial_idB]
+dev_result_predictionsB = trialsB.attachments["ATTACH::%d::Predictions" % best_trial_idB]
+dev_result_labelB = trialsB.attachments["ATTACH::%d::Labels" % best_trial_idB]
 
-#%%
-fmin_trial = pickle.load(open("C:\\Users\\sysadmin\\Downloads\\HearSay\\SocKult_RumDet\\Preprocessing\\output\\trials_veracity.txt", "rb"))
-paramsB = fmin_trial.best_trial['result']['Params']
-
-paramsB['num_epochs'] = 32
-
+print(accuracy_score(dev_result_labelB, dev_result_predictionsB))
+print(f1_score(dev_result_labelB, dev_result_predictionsB, average='macro'))
 
 metafeatures_combinations = [
-    ["cosine_similarity", "user_information"],
-    ["cosine_similarity", "social_interest"],
-    ["cosine_similarity", "social_interest", "user_information"],
-    ["cosine_similarity", "social_interest", "user_information", "stance"]
+    #["cosine_similarity", "user_information"],
+    #["cosine_similarity", "social_interest"],
+    #["cosine_similarity", "social_interest", "user_information"],
+    ["cosine_similarity", "user_information", "stance"]
+    ["cosine_similarity", "social_interest", "stance"]
+    #["cosine_similarity", "social_interest", "user_information", "stance"]
 ]
+paramsB["num_epochs"] = 40
 
 for metac in metafeatures_combinations:
-    test_result_idB, test_result_predictionsB, confidenceB, mactest_F  = evaluation_function_veracity_branchLSTM(paramsB, metac)
+    print("Commencing training with the combination: {}".format(metac))
+    test_result_idB, test_result_predictionsB, test_result_labelB, confidenceB, mactest_F  = evaluation_function_veracity_branchLSTM(paramsB, metac)
     print("With combination: ", metac, ":", sep=" ")
     print("F1: {}".format(mactest_F))
+    print("Accuracy: {}".format(accuracy_score(test_result_labelB, test_result_predictionsB)))
     print("")
     
+#print(accuracy_score(test_result_labelB, test_result_predictionsB))
+#print(f1_score(test_result_labelB, test_result_predictionsB, average='macro'))
 
 #confidenceB = [1.0 for i in range((len(test_result_predictionsB)))]
 
 #print(accuracy_score(test_result_labelB,test_result_predictionsB))
 
-print(mactest_F)
+#print(mactest_F)
 #%%
 #a = convertsave_competitionformat(dev_result_idB, dev_result_predictionsB, confidenceB)
 
