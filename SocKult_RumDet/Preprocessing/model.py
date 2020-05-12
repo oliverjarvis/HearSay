@@ -110,12 +110,13 @@ def LSTM_model_veracity(x_train_embeddings, x_train_metafeatures, y_train, x_tes
     # Compiling model
     model.compile(optimizer=adam, loss='categorical_crossentropy',
                   metrics=['accuracy'])
+    #plot_model(model, "model.png") 
 
     # Fitting the model with varying batch sizes and epochs using parameter search
     model.fit({'Embeddings': x_train_embeddings, 'Metafeatures': x_train_metafeatures}, y_train,
               batch_size=mb_size,
               epochs=num_epochs, shuffle=True, class_weight=None, verbose=0)
-              
+
     #model.fit([x_train_embeddings,, y_train, batch_size=mb_size, epochs=num_epochs, shuffle=True, class_weight=None, verbose=1)
     # Evaluation time
     if eval==True:

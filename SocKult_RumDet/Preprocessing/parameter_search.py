@@ -33,11 +33,11 @@ def parameter_search(ntrials, objective_function, task):
     
     bp = trials.best_trial['result']['Params']
     
-    f = open("C:\\Users\\sysadmin\\Downloads\\HearSay\\SocKult_RumDet\\Preprocessing\\output\\trials_"+task+".txt", "wb+")
+    f = open("C:\\Users\\sysadmin\\Downloads\\HearSay\\SocKult_RumDet\\Preprocessing\\output\\trials2_"+task+".txt", "wb+")
     pickle.dump(trials, f)
     f.close()
     
-    filename = "C:\\Users\\sysadmin\\Downloads\\HearSay\\SocKult_RumDet\\Preprocessing\\output\\bestparams_"+task+".txt"
+    filename = "C:\\Users\\sysadmin\\Downloads\\HearSay\\SocKult_RumDet\\Preprocessing\\output\\bestparams2_"+task+".txt"
     f = open(filename, "wb")
     pickle.dump(bp, f)
     f.close()

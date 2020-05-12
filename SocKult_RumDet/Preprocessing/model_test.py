@@ -106,7 +106,7 @@ def LSTM_model_veracity(x_train_embeddings, x_train_metafeatures, y_train, x_tes
 
     # Getting predictions of the model
     """y_prob = model.predict([x_test_embeddings, x_test_metafeatures], batch_size=mb_size)"""
-    y_prob = model.predict(x_test_embeddings, batch_size=mb_size)
+    y_prob = model.predict(x_test_metafeatures, batch_size=mb_size)
     Y_pred = y_prob.argmax(axis=-1)
     return Y_pred, confidence
 

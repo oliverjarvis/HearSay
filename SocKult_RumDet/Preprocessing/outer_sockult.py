@@ -58,7 +58,7 @@ metafeatures_combinations = [
     #["cosine_similarity", "user_information"],
     #["cosine_similarity", "social_interest"],
     #["cosine_similarity", "social_interest", "user_information"],
-    ["cosine_similarity", "user_information", "stance"]
+    ["cosine_similarity", "user_information", "stance"],
     ["cosine_similarity", "social_interest", "stance"]
     #["cosine_similarity", "social_interest", "user_information", "stance"]
 ]
