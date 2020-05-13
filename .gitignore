@@ -14,6 +14,9 @@ hsenv
 /SocKult_RumDet/Preprocessing/saved_dataSocKult_RumDet
 /SocKult_RumDet/Preprocessing/Safebox
 /SocKult_RumDet/Preprocessing/sacred-twitter-data-w-test
+/SocKult_RumDet/Preprocessing/output/logger
+/SocKult_RumDet/Preprocessing/logs
+
 
 /cache
 SocKult_RumDet/Preprocessing/data.zip

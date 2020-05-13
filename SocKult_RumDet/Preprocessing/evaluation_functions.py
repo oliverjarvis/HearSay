@@ -78,7 +78,7 @@ def split_features(data, metagroups):
     return new_metafeature
 
 #%%
-def evaluation_function_veracity_branchLSTM(params, metac):
+def evaluation_function_veracity_branchLSTM(params, metac, use_embeddings=True):
     
     x_train_embeddings, x_train_metafeatures, y_train = load_data_from_dir("train", num_classes=3)
     x_dev_embeddings, x_dev_metafeatures, y_dev = load_data_from_dir("dev", num_classes=3)
@@ -87,14 +87,14 @@ def evaluation_function_veracity_branchLSTM(params, metac):
     x_train_metafeatures = split_features(x_train_metafeatures, metac)
     x_dev_metafeatures = split_features(x_dev_metafeatures, metac)
     x_test_metafeatures = split_features(x_test_metafeatures, metac)
-    
+
     x_train_embeddings = np.concatenate((x_train_embeddings, x_dev_embeddings), axis = 0)
     x_train_metafeatures = np.concatenate((x_train_metafeatures, x_dev_metafeatures), axis = 0)
     y_train = np.concatenate((y_train, y_dev), axis=0)
 
     # Getting predictions and confidence of the model
     y_pred, confidence = LSTM_model_veracity(x_train_embeddings, x_train_metafeatures, y_train,
-                                        x_test_embeddings, x_test_metafeatures, params)
+                                        x_test_embeddings, x_test_metafeatures, params, use_embeddings=use_embeddings)
     
     #Getting the predictions of trees and the branches
     trees, tree_prediction, tree_label, tree_confidence = branch2treelabels(ids_test, 

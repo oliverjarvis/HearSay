@@ -11,17 +11,23 @@ from tensorflow.keras.layers import TimeDistributed, Masking
 from tensorflow.keras.layers import Concatenate
 from tensorflow.keras import optimizers
 from tensorflow.keras import regularizers
+from tensorflow.keras.callbacks import TensorBoard
+
 from tensorflow.keras.utils import plot_model
 import json
+import datetime
 
 seed_value = 1
-os.environ["PYTHONHASHSEED"] = str(seed_value)
+os.environ["PYTHONHASHSEED"] = str(0)
 random.seed(seed_value)
 np.random.seed(seed_value)
 tfr.set_seed(seed_value)
 
+
+log_dir = "SocKult_RumDet\\Preprocessing\\logs\\fit\\" + datetime.datetime.now().strftime("%d%m%Y-%H%M%S")
+
 #%%
-def LSTM_model_veracity(x_train_embeddings, x_train_metafeatures, y_train, x_test_embeddings, x_test_metafeatures, params,eval=False ):
+def LSTM_model_veracity(x_train_embeddings, x_train_metafeatures, y_train, x_test_embeddings, x_test_metafeatures, params,eval=False, use_embeddings=True, use_metafeatures=True):
     # Parameter search
     num_lstm_units = int(params['num_lstm_units'])
     num_lstm_layers = int(params['num_lstm_layers'])
@@ -50,46 +56,54 @@ def LSTM_model_veracity(x_train_embeddings, x_train_metafeatures, y_train, x_tes
     # Adding attention and LSTM layers with varying layers and units using parameter search            
     if attention == 1:
         for nl in range(num_lstm_layers):
-            emb_LSTM_query = Bidirectional(LSTM(num_lstm_units, dropout=dropout, recurrent_dropout=0.2,
-                        return_sequences=True))(emb_mask)
+            if use_embeddings:
+                emb_LSTM_query = Bidirectional(LSTM(num_lstm_units, dropout=dropout, recurrent_dropout=0.2,
+                            return_sequences=True))(emb_mask)
 
-            emb_LSTM_value = Bidirectional(LSTM(num_lstm_units, dropout=dropout, recurrent_dropout=0.2,
-                        return_sequences=True))(emb_mask)
+                emb_LSTM_value = Bidirectional(LSTM(num_lstm_units, dropout=dropout, recurrent_dropout=0.2,
+                            return_sequences=True))(emb_mask)
+            if use_metafeatures:
+                metafeatures_LSTM_query = Bidirectional(LSTM(num_lstm_units, dropout=dropout, recurrent_dropout=0.2,
+                                return_sequences=True))(metafeatures_mask)
 
-            metafeatures_LSTM_query = Bidirectional(LSTM(num_lstm_units, dropout=dropout, recurrent_dropout=0.2,
-                            return_sequences=True))(metafeatures_mask)
-
-            metafeatures_LSTM_value = Bidirectional(LSTM(num_lstm_units, dropout=dropout, recurrent_dropout=0.2,
-                            return_sequences=True))(metafeatures_mask)
-
-        emb_LSTM = AdditiveAttention(name = 'Attention_Embeddings')([emb_LSTM_query, emb_LSTM_value])
-        metafeatures_LSTM = AdditiveAttention(name = 'Attention_Metafeatures')([metafeatures_LSTM_query, metafeatures_LSTM_value])
+                metafeatures_LSTM_value = Bidirectional(LSTM(num_lstm_units, dropout=dropout, recurrent_dropout=0.2,
+                                return_sequences=True))(metafeatures_mask)
+        if use_embeddings:
+            emb_LSTM = AdditiveAttention(name = 'Attention_Embeddings')([emb_LSTM_query, emb_LSTM_value])
+        if use_metafeatures:
+            metafeatures_LSTM = AdditiveAttention(name = 'Attention_Metafeatures')([metafeatures_LSTM_query, metafeatures_LSTM_value])
     else:
-        emb_LSTM = LSTM(num_lstm_units, dropout=dropout, recurrent_dropout=dropout,
-                        return_sequences=True)(emb_mask)
-        metafeatures_LSTM = LSTM(num_lstm_units, dropout=dropout, recurrent_dropout=dropout,
-                            return_sequences=True)(metafeatures_mask)
+        if use_embeddings:
+            emb_LSTM =  Bidirectional(LSTM(num_lstm_units, dropout=dropout, recurrent_dropout=dropout,
+                        return_sequences=True))(emb_mask)
+        if use_metafeatures:
+            metafeatures_LSTM =  Bidirectional(LSTM(num_lstm_units, dropout=dropout, recurrent_dropout=dropout,
+                            return_sequences=True))(metafeatures_mask)
     
-
+    if use_embeddings and use_metafeatures:
     # Concatenating the two inputs
-    model = Concatenate()([emb_LSTM, metafeatures_LSTM])
-
+        model = Concatenate()([emb_LSTM, metafeatures_LSTM])
+    elif use_metafeatures:
+        model = metafeatures_LSTM
+    else:
+        model = emb_LSTM
+    
     # Adding attention and another LSTM to the concatenated layers
     if attention == 1:
-        model_query = LSTM(num_lstm_units, dropout=dropout, recurrent_dropout=0.2, return_sequences=False)(model)
-        model_value = LSTM(num_lstm_units, dropout=dropout, recurrent_dropout=0.2, return_sequences=False)(model)
+        model_query =  Bidirectional(LSTM(num_lstm_units, dropout=dropout, recurrent_dropout=0.2, return_sequences=False))(model)
+        model_value =  Bidirectional(LSTM(num_lstm_units, dropout=dropout, recurrent_dropout=0.2, return_sequences=False))(model)
         model = AdditiveAttention(name = 'Attention_Model')([model_query, model_value])
 
     else:
-        model = LSTM(num_lstm_units, dropout=dropout, recurrent_dropout=dropout, return_sequences=False)(model)    
+        model =  Bidirectional(LSTM(num_lstm_units, dropout=dropout, recurrent_dropout=dropout, return_sequences=False))(model)    
 
     # Adding dense layer with varying layers and units using parameter search
     for nl in range(num_dense_layers):
         model = Dense(num_dense_units)(model)
         model = LeakyReLU()(model)
 
-    # Adding dropout of 50% to the model
-    model = Dropout(dropout)(model)
+    # Adding dropout to the model
+    model = Dropout(dropout, seed = seed_value)(model)
 
     # Adding softmax dense layer with varying l2 regularizers using parameter search
     output = Dense(3, activation='softmax',
@@ -110,12 +124,16 @@ def LSTM_model_veracity(x_train_embeddings, x_train_metafeatures, y_train, x_tes
     # Compiling model
     model.compile(optimizer=adam, loss='categorical_crossentropy',
                   metrics=['accuracy'])
+    
+    #TensorBoard
+    tensorboard_callback = TensorBoard(log_dir=log_dir, histogram_freq=1)
+
     #plot_model(model, "model.png") 
 
     # Fitting the model with varying batch sizes and epochs using parameter search
     model.fit({'Embeddings': x_train_embeddings, 'Metafeatures': x_train_metafeatures}, y_train,
               batch_size=mb_size,
-              epochs=num_epochs, shuffle=True, class_weight=None, verbose=0)
+              epochs=num_epochs, shuffle=True, class_weight=None, verbose=1, callbacks=[tensorboard_callback])
 
     #model.fit([x_train_embeddings,, y_train, batch_size=mb_size, epochs=num_epochs, shuffle=True, class_weight=None, verbose=1)
     # Evaluation time
