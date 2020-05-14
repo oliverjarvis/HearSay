@@ -1,9 +1,0 @@
-Combination: ['stance']
-Using Embeddings: False
-With EarlyStopping: True
-Resulted in: 
-Precision: 0.15217391304347824
-Recall: 0.3333333333333333
-F1: 0.20895522388059698
- Accuracy: 0.45652173913043476
-
