@@ -4,7 +4,7 @@ from evaluation_functions import evaluation_function_veracity_branchLSTM
 import json
 import os
 import pickle
-from sklearn.metrics import f1_score, accuracy_score
+from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_score
 from pathlib import Path
 import time
 from datetime import datetime
@@ -86,32 +86,33 @@ metafeatures_combinations = [
     ["stance"], # stance = S
     ["social_interest", "user_information"], # Metadata = MD
     ["cosine_similarity"], # Semantic content = SC
-    #["cosine_similarity", "user_information"], # SC + ui
-    #["cosine_similarity", "social_interest"], # SC + si
+    ["stance", "social_interest", "user_information"], # S + MD
     ["cosine_similarity", "social_interest", "user_information"], # SC + MD
-    #["cosine_similarity", "user_information", "stance"], # SC + ui + S
-    #["cosine_similarity", "social_interest", "stance"], # SC + si + S
-    ["cosine_similarity", "social_interest", "user_information", "stance"] # over 9000
+    ["cosine_similarity", "stance"], # SC + S
+    ["cosine_similarity", "social_interest", "user_information", "stance"] # FULL MODEL
 ]
-paramsB["num_epochs"] = 40
+event_splits = pickle.load(open("C:\\Users\\sysadmin\\Downloads\\HearSay\\SocKult_RumDet\\Preprocessing\\sacred-twitter-data-w-test\\splits.pickle", "rb"))
 
-
-for metac_idx in range(len(metafeatures_combinations)):
-    if metac_idx in [0, 1]:
-        embeddings_present = False
-    else:
-        embeddings_present = True
-    
-    print("Commencing training with the combination: {}".format(metafeatures_combinations[metac_idx]))
-    print("Using Embeddings: ", embeddings_present)
-    test_result_idB, test_result_predictionsB, test_result_labelB, confidenceB, mactest_F  = evaluation_function_veracity_branchLSTM(paramsB, metafeatures_combinations[metac_idx], use_embeddings=embeddings_present)
-    message = "Combination: {}\nUsing Embeddings: {}\nResulted in F1: {} and Accuracy: {}\n\n".format(metafeatures_combinations[metac_idx], embeddings_present, mactest_F, accuracy_score(test_result_labelB, test_result_predictionsB))
-    logger.log(message)
+for Early_Stopping in [False, True]:
+    for metac_idx in range(len(metafeatures_combinations)):
+        if metac_idx in [0, 1, 3]:
+            embeddings_present = False
+        else:
+            embeddings_present = True
+        print("Commencing training with the combination: {}".format(metafeatures_combinations[metac_idx]))
+        print("Using Embeddings: ", embeddings_present)
+        if Early_Stopping:
+            paramsB["num_epochs"] = 64
+        test_result_idB, test_result_predictionsB, test_result_labelB, confidenceB, mactest_F  = evaluation_function_veracity_branchLSTM(paramsB, metafeatures_combinations[metac_idx], use_embeddings=embeddings_present, Early_Stopping=Early_Stopping)
+        precision = precision_score(test_result_labelB, test_result_predictionsB, average = 'macro')
+        recall = recall_score(test_result_labelB, test_result_predictionsB, average = 'macro')
+        message = "Combination: {}\nUsing Embeddings: {}\nWith EarlyStopping: {}\nResulted in: \nPrecision: {}\nRecall: {}\nF1: {}\nAccuracy: {}\n\n".format(metafeatures_combinations[metac_idx], embeddings_present, Early_Stopping, precision, recall, mactest_F, accuracy_score(test_result_labelB, test_result_predictionsB))
+        logger.log(message)
     #print("With combination: ", metac, ":", sep=" ")
     #print("F1: {}".format(mactest_F))
     #print("Accuracy: {}".format(accuracy_score(test_result_labelB, test_result_predictionsB)))
     #print("")
-    
+
 #print(accuracy_score(test_result_labelB, test_result_predictionsB))
 #print(f1_score(test_result_labelB, test_result_predictionsB, average='macro'))
 
@@ -124,3 +125,19 @@ for metac_idx in range(len(metafeatures_combinations)):
 #a = convertsave_competitionformat(dev_result_idB, dev_result_predictionsB, confidenceB)
 
 #b = convertsave_competitionformat(test_result_idB, test_result_predictionsB,confidenceB )
+
+
+
+"""metafeatures_combinations = [
+    ["stance"], # stance = S
+    ["social_interest", "user_information"], # Metadata = MD
+    ["cosine_similarity"], # Semantic content = SC
+    ["stance", "social_interest", "user_information"], # SC + MD
+    #["cosine_similarity", "user_information"], # SC + ui
+    #["cosine_similarity", "social_interest"], # SC + si
+    ["cosine_similarity", "social_interest", "user_information"], # SC + MD
+    ["cosine_similarity", "stance"], # SC + S
+    #["cosine_similarity", "user_information", "stance"], # SC + ui + S
+    #["cosine_similarity", "social_interest", "stance"], # SC + si + S
+    ["cosine_similarity", "social_interest", "user_information", "stance"] # over 9000
+]"""

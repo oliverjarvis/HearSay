@@ -11,7 +11,7 @@ from tensorflow.keras.layers import TimeDistributed, Masking
 from tensorflow.keras.layers import Concatenate
 from tensorflow.keras import optimizers
 from tensorflow.keras import regularizers
-from tensorflow.keras.callbacks import TensorBoard
+from tensorflow.keras.callbacks import TensorBoard, EarlyStopping
 
 from tensorflow.keras.utils import plot_model
 import json
@@ -27,7 +27,7 @@ tfr.set_seed(seed_value)
 log_dir = "SocKult_RumDet\\Preprocessing\\logs\\fit\\" + datetime.datetime.now().strftime("%d%m%Y-%H%M%S")
 
 #%%
-def LSTM_model_veracity(x_train_embeddings, x_train_metafeatures, y_train, x_test_embeddings, x_test_metafeatures, params,eval=False, use_embeddings=True, use_metafeatures=True):
+def LSTM_model_veracity(x_train_embeddings, x_train_metafeatures, y_train, x_test_embeddings, x_test_metafeatures, params,eval=False, use_embeddings=True, use_metafeatures=True, Early_Stopping=True):
     # Parameter search
     num_lstm_units = int(params['num_lstm_units'])
     num_lstm_layers = int(params['num_lstm_layers'])
@@ -42,16 +42,24 @@ def LSTM_model_veracity(x_train_embeddings, x_train_metafeatures, y_train, x_tes
 
     
     # Defining input shapes
-    emb_shape = x_train_embeddings[0].shape
-    metafeatures_shape = x_train_metafeatures[0].shape
+    if use_embeddings:
+        emb_shape = x_train_embeddings[0].shape
+
+    if use_metafeatures:
+        metafeatures_shape = x_train_metafeatures[0].shape
 
     # Creating the two inputs
-    emb_input = Input(shape = emb_shape, name = 'Embeddings')
-    metafeatures_input = Input(shape = metafeatures_shape, name = 'Metafeatures')
+    if use_embeddings:
+        emb_input = Input(shape = emb_shape, name = 'Embeddings')
+    
+    if use_metafeatures:
+        metafeatures_input = Input(shape = metafeatures_shape, name = 'Metafeatures')
 
     # Adding masks to account for zero paddings
-    emb_mask = Masking(mask_value=0, input_shape=(None, emb_shape))(emb_input)
-    metafeatures_mask = (Masking(mask_value=0, input_shape=(None, metafeatures_shape)))(metafeatures_input)
+    if use_embeddings:
+        emb_mask = Masking(mask_value=0, input_shape=(None, emb_shape))(emb_input)
+    if use_metafeatures:
+        metafeatures_mask = (Masking(mask_value=0, input_shape=(None, metafeatures_shape)))(metafeatures_input)
 
     # Adding attention and LSTM layers with varying layers and units using parameter search            
     if attention == 1:
@@ -85,8 +93,7 @@ def LSTM_model_veracity(x_train_embeddings, x_train_metafeatures, y_train, x_tes
         model = Concatenate()([emb_LSTM, metafeatures_LSTM])
     elif use_metafeatures:
         model = metafeatures_LSTM
-    else:
-        model = emb_LSTM
+
     
     # Adding attention and another LSTM to the concatenated layers
     if attention == 1:
@@ -103,7 +110,7 @@ def LSTM_model_veracity(x_train_embeddings, x_train_metafeatures, y_train, x_tes
         model = LeakyReLU()(model)
 
     # Adding dropout to the model
-    model = Dropout(dropout, seed = seed_value)(model)
+    model = Dropout(dropout)(model)
 
     # Adding softmax dense layer with varying l2 regularizers using parameter search
     output = Dense(3, activation='softmax',
@@ -111,7 +118,10 @@ def LSTM_model_veracity(x_train_embeddings, x_train_metafeatures, y_train, x_tes
                     name = 'labels')(model)
 
     # Model output
-    model = Model(inputs=[emb_input, metafeatures_input], outputs=output)
+    if use_embeddings and use_metafeatures:
+        model = Model(inputs=[emb_input, metafeatures_input], outputs=output)
+    elif use_metafeatures:
+        model = Model(inputs=metafeatures_input, outputs=output)
     #model = Model(inputs=emb_input, outputs=output)
     # Plotting the model 
     #plot_model(model, to_file='model_plot.png', show_shapes=True, show_layer_names=True)
@@ -125,17 +135,39 @@ def LSTM_model_veracity(x_train_embeddings, x_train_metafeatures, y_train, x_tes
     model.compile(optimizer=adam, loss='categorical_crossentropy',
                   metrics=['accuracy'])
     
+    callback_list = []
     #TensorBoard
     tensorboard_callback = TensorBoard(log_dir=log_dir, histogram_freq=1)
+    callback_list.append(tensorboard_callback)
+    
+    #Early_Stopping
+    if Early_Stopping:
+        earlystop_callback = EarlyStopping(monitor='val_accuracy', min_delta=0.0001, patience=5)
+        callback_list.append(earlystop_callback)
 
     #plot_model(model, "model.png") 
+    if Early_Stopping:
+        # Fitting the model with varying batch sizes and epochs using parameter search        
+        if use_embeddings and use_metafeatures:
+            model.fit({'Embeddings': x_train_embeddings, 'Metafeatures': x_train_metafeatures}, y_train,
+                    batch_size=mb_size,
+                    epochs=num_epochs, shuffle=True, class_weight=None, verbose=1, callbacks=callback_list, validation_split=.1)
+        elif use_metafeatures:
+            model.fit(x_train_metafeatures, y_train,
+                    batch_size=mb_size,
+                    epochs=num_epochs, shuffle=True, class_weight=None, verbose=1, callbacks=callback_list, validation_split=.1)
+    else:
+         # Fitting the model with varying batch sizes and epochs using parameter search        
+        if use_embeddings and use_metafeatures:
+            model.fit({'Embeddings': x_train_embeddings, 'Metafeatures': x_train_metafeatures}, y_train,
+                    batch_size=mb_size,
+                    epochs=num_epochs, shuffle=True, class_weight=None, verbose=1, callbacks=callback_list)
+        elif use_metafeatures:
+            model.fit(x_train_metafeatures, y_train,
+                    batch_size=mb_size,
+                    epochs=num_epochs, shuffle=True, class_weight=None, verbose=1, callbacks=callback_list)
+        
 
-    # Fitting the model with varying batch sizes and epochs using parameter search
-    model.fit({'Embeddings': x_train_embeddings, 'Metafeatures': x_train_metafeatures}, y_train,
-              batch_size=mb_size,
-              epochs=num_epochs, shuffle=True, class_weight=None, verbose=1, callbacks=[tensorboard_callback])
-
-    #model.fit([x_train_embeddings,, y_train, batch_size=mb_size, epochs=num_epochs, shuffle=True, class_weight=None, verbose=1)
     # Evaluation time
     if eval==True:
 
@@ -146,14 +178,21 @@ def LSTM_model_veracity(x_train_embeddings, x_train_metafeatures, y_train, x_tes
         model.save_weights('output\\model_veracity_weights.h5')
 
     # Getting confidence of the model
-    pred_probabilities = model.predict([x_test_embeddings, x_test_metafeatures], batch_size=mb_size, verbose=0)
-    """pred_probabilities = model.predict(x_test_embeddings, batch_size=mb_size, verbose=1)"""
-    confidence = np.max(pred_probabilities, axis=1)
+    if use_embeddings and use_metafeatures:
+        pred_probabilities = model.predict([x_test_embeddings, x_test_metafeatures], batch_size=mb_size, verbose=0)
+        confidence = np.max(pred_probabilities, axis=1)
 
-    # Getting predictions of the model
-    y_prob = model.predict([x_test_embeddings, x_test_metafeatures], batch_size=mb_size)
-    """y_prob = model.predict(x_test_embeddings, batch_size=mb_size)"""
-    Y_pred = y_prob.argmax(axis=-1)
+        # Getting predictions of the model
+        y_prob = model.predict([x_test_embeddings, x_test_metafeatures], batch_size=mb_size)
+        Y_pred = y_prob.argmax(axis=-1)
+    elif use_metafeatures:
+        pred_probabilities = model.predict(x_test_metafeatures, batch_size=mb_size, verbose=0)
+        confidence = np.max(pred_probabilities, axis=1)
+
+        # Getting predictions of the model
+        y_prob = model.predict(x_test_metafeatures, batch_size=mb_size)
+        Y_pred = y_prob.argmax(axis=-1)
+
     return Y_pred, confidence
 
 
