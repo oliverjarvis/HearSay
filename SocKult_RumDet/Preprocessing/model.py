@@ -94,7 +94,6 @@ def LSTM_model_veracity(x_train_embeddings, x_train_metafeatures, y_train, x_tes
     elif use_metafeatures:
         model = metafeatures_LSTM
 
-    
     # Adding attention and another LSTM to the concatenated layers
     if attention == 1:
         model_query =  Bidirectional(LSTM(num_lstm_units, dropout=dropout, recurrent_dropout=0.2, return_sequences=False))(model)
