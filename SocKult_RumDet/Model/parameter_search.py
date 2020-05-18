@@ -2,12 +2,21 @@
 Parameter search function
 """
 import pickle
+from pathlib import Path
 from hyperopt import fmin, tpe, hp, Trials
 import numpy
 
-def parameter_search(ntrials, objective_function, task):
+def parameter_search(ntrials, objective_function, data_path, task="veracity"):
+    output_path = Path("output")
+    if not output_path.is_dir():
+        output_path.mkdir()
+    trial_path = "trials_{}.txt".format(task)
+    bp_path = "bestparams_{}.txt".format(task)
+    trialsfile = open(output_path / trial_path, "wb+")
+    paramsfile = open(output_path / bp_path, "wb+")
 
-    search_space = {'num_dense_layers': hp.choice('nlayers', [1, 2]),
+    search_space = {'data_dir':hp.choice('data_dir', [data_path]),
+                    'num_dense_layers': hp.choice('nlayers', [1, 2]),
                     'num_dense_units': hp.choice('num_dense', [200, 300, 400]),
                     'num_epochs': hp.choice('num_epochs',  [32, 64]),
                     'num_lstm_units': hp.choice('num_lstm_units', [100, 200,
@@ -33,13 +42,12 @@ def parameter_search(ntrials, objective_function, task):
     
     bp = trials.best_trial['result']['Params']
     
-    f = open("C:\\Users\\sysadmin\\Downloads\\HearSay\\SocKult_RumDet\\Preprocessing\\output\\trials2_"+task+".txt", "wb+")
-    pickle.dump(trials, f)
+    
+    pickle.dump(trials, trialsfile)
     f.close()
     
-    filename = "C:\\Users\\sysadmin\\Downloads\\HearSay\\SocKult_RumDet\\Preprocessing\\output\\bestparams2_"+task+".txt"
-    f = open(filename, "wb")
-    pickle.dump(bp, f)
+    
+    pickle.dump(bp, paramsfile)
     f.close()
     
     return bp, trials

@@ -24,11 +24,12 @@ np.random.seed(seed_value)
 tfr.set_seed(seed_value)
 
 
-log_dir = "SocKult_RumDet\\Preprocessing\\logs\\fit\\" + datetime.datetime.now().strftime("%d%m%Y-%H%M%S")
 
 #%%
-def LSTM_model_veracity(x_train_embeddings, x_train_metafeatures, y_train, x_test_embeddings, x_test_metafeatures, params,eval=False, use_embeddings=True, use_metafeatures=True, Early_Stopping=True):
+def LSTM_model_veracity(x_train_embeddings, x_train_metafeatures, y_train, x_test_embeddings, x_test_metafeatures, params,eval=False, use_embeddings=True, use_metafeatures=True, Early_Stopping=True, log_path=""):
     # Parameter search
+    log_dir = log_path + datetime.datetime.now().strftime("%d%m%Y-%H%M%S")
+
     num_lstm_units = int(params['num_lstm_units'])
     num_lstm_layers = int(params['num_lstm_layers'])
     num_dense_layers = int(params['num_dense_layers'])

@@ -59,10 +59,7 @@ The processing script can be called as follows
 python ./Preprocess.py 
 ```
 The preprocessing script accepts several arguments:
-    parser.add_argument('--input', '-i', help='folder for training data', default="Data")
-    parser.add_argument('--dataset', '-d', help='name of dataset', default="")
-    parser.add_argument('--metacontext', '-m', help="hydrated twitter data folder")
-    parser.add_argument('--output', '-o', help='destination for files', default="")
+
 Argument | Type | Default value | Description
 ---------|------|---------------|------------
 dataset_path | `str` | `"Data/"` | Directory path for all data. Folder should be in structure presented above
@@ -74,8 +71,8 @@ output | `str` | `"outdata"` | Output directory for preprocessed data
 
 ## Training
 
-Once the data has been preprocessed, the training can be run with the Train.py file
-The traaining script can be called as follows
+Once the data has been preprocessed, the training can be run with the Train.py file.
+The training script can be called as follows
 
 ```bash
 python ./Train.py 

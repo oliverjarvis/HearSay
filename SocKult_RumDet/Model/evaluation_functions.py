@@ -15,9 +15,9 @@ import pickle
 from copy import deepcopy
 from pathlib import Path
 
-from model import LSTM_model_veracity
+from Model.model import LSTM_model_veracity
 
-from .Utils.branch2treelabels import branch2treelabels
+from Utils.branch2treelabels import branch2treelabels
 
 
 embeddings_name = "embeddings_array.npy"
@@ -63,7 +63,7 @@ def plot_attention(attention, sentence, predicted_sentence):
 
   plt.show()
 
-def load_data_from_dir(dir, num_classes=3, with_ids=False):
+def load_data_from_dir(dir, num_classes=3, with_ids=False, data_dir = None):
     embeddings = np.load( data_dir / dir / embeddings_name )
     metafeatures = np.load( data_dir / dir / metafeatures_name )
     labels = np.load( data_dir / dir / labels_name)
@@ -120,9 +120,9 @@ def split_event_loo(data, tweet_ids, event):
 #%%
 def evaluation_function_veracity_branchLSTM(data_dir, params, metac, use_embeddings=True, event="", Early_Stopping = True):
 
-    x_train_embeddings, x_train_metafeatures, y_train, ids_train = load_data_from_dir("train", num_classes=3, with_ids=True)
-    x_dev_embeddings, x_dev_metafeatures, y_dev, ids_dev = load_data_from_dir("dev", num_classes=3, with_ids=True)
-    x_test_embeddings, x_test_metafeatures, y_test, ids_test = load_data_from_dir("test", num_classes=0, with_ids=True)
+    x_train_embeddings, x_train_metafeatures, y_train, ids_train = load_data_from_dir("train", num_classes=3, with_ids=True, data_dir = data_dir)
+    x_dev_embeddings, x_dev_metafeatures, y_dev, ids_dev = load_data_from_dir("dev", num_classes=3, with_ids=True, data_dir = data_dir)
+    x_test_embeddings, x_test_metafeatures, y_test, ids_test = load_data_from_dir("test", num_classes=0, with_ids=True, data_dir = data_dir)
 
     x_train_metafeatures = split_features(x_train_metafeatures, metac)
     x_dev_metafeatures = split_features(x_dev_metafeatures, metac)
@@ -132,7 +132,6 @@ def evaluation_function_veracity_branchLSTM(data_dir, params, metac, use_embeddi
     x_train_metafeatures = np.concatenate((x_train_metafeatures, x_dev_metafeatures), axis = 0)
     y_train = np.concatenate((y_train, y_dev), axis=0)
     ids_train = np.concatenate((ids_train, ids_dev), axis=0)
-
 
     #x_train_embeddings, x_dev_embeddings = split_event_loo(x_train_embeddings, ids_train, event)
     #x_train_metafeatures, x_dev_metafeatures = split_event_loo(x_train_metafeatures, ids_train, event)
