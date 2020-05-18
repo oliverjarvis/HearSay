@@ -1,4 +1,4 @@
-#HearSay
+# HearSay
 
 A GitHub repository for the Social and Cultural Dynamics Exam Paper.
 
