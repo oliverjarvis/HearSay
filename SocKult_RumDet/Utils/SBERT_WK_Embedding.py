@@ -12,7 +12,7 @@ import torch
 import random
 
 from transformers import AutoConfig, AutoTokenizer, AutoModelWithLMHead
-import Utils.SBERTutils
+from Utils.SBERTutils import generate_embedding
 
 class SBERT_WK_Embedding:
 
@@ -84,7 +84,7 @@ class SBERT_WK_Embedding:
 
         params = vars(self)
 
-        embed_method = SBERTutils.generate_embedding(self.embed_method, features_mask)
+        embed_method = generate_embedding(self.embed_method, features_mask)
         embedding = embed_method.embed(params, layer_embedding)[0]
         
         return embedding

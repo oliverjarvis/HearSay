@@ -9,17 +9,22 @@ from Model.evaluation_functions import evaluation_function_veracity_branchLSTM
 
 from Utils.Logger import Logger
 
-def train(data_path, params_path, log_path, log_name)
+def train(data_path, params_path, log_path, log_name, HPsearch):
     
     data_path = Path(data_path)
     params_path = Path(params_path)
     log_path = Path(log_path)
-    log_name = Path(log_name)
+    log_name = log_name
 
     logger = Logger(log_path, log_name)
 
-    trialsB = pickle.load(open(params_path / 'trials2_veracity.txt' "rb"))
-    paramsB = pickle.load(open(params_path / 'bestparams2_veracity.txt', "rb"))
+    if HPsearch:
+        ntrials = 100
+        paramsB, trialsB = parameter_search(ntrials, objective_function_veracity_branchLSTM, data_path)
+
+    else:
+        trialsB = pickle.load(open(params_path / 'trials_veracity.txt', "rb"))
+        paramsB = pickle.load(open(params_path / 'bestparams_veracity.txt', "rb"))
 
     best_trial_idB = trialsB.best_trial["tid"]
     best_trial_lossB = trialsB.best_trial["result"]["loss"]
@@ -39,6 +44,7 @@ def train(data_path, params_path, log_path, log_name)
         ["cosine_similarity", "stance"], # SC + S
         ["cosine_similarity", "social_interest", "user_information", "stance"] # FULL MODEL
     ]
+    
     #Running the model with our different folds
     for Early_Stopping in [False, True]:
         for metac_idx in range(len(metafeatures_combinations)):
@@ -59,14 +65,17 @@ def train(data_path, params_path, log_path, log_name)
 if __name__ == '__main__':
     parser = argparse.ArgumentParser('HearSay Train')
     parser.add_argument('--input', '-i', help='Folder containing both train/dev/test data', default="")
-    parser.add_argument('--params', '-p', help='Folder for hyperparameter files', default="")
-    parser.add_argument('--log_path', 'lp', help="Path for logging data")
-    parser.add_argument('--log_name', 'ln', help="Name for logging folder")
+    parser.add_argument('--params', '-p', help='Folder for hyperparameter files', default="parameters")
+    parser.add_argument('--HPsearch', help="Flag for whether or not hyperparameter search should be activated", action="store_true")
+    parser.add_argument('--log_path', '-g', help="Path for logging data", default="logs")
+    parser.add_argument('--log_name', '-n', help="Name for logging folder", default="log")
+    parser = parser.parse_args()
 
     train(
-        data_path = parser.input, 
-        params_path = parser.params, 
-        log_path = parser.log, 
-        log_name = parser.log_folder
+        data_path = parser.input.strip(), 
+        params_path = parser.params.strip(), 
+        log_path = parser.log_path.strip(), 
+        log_name = parser.log_name.strip(),
+        HPsearch = parser.HPsearch
         )
     
