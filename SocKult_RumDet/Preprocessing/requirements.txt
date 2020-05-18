@@ -1,9 +1,0 @@
-pandas
-numpy
-nltk
-pytorch
-transformers
-sklearn
-gensim
-keras
-tensorflow
