@@ -3,9 +3,9 @@ import argparse
 import numpy as np
 from pathlib import Path
 
-from Preprocessing.Features import Features
-from Preprocessing.preprocessing_tweets import load_dataset
-from Preprocessing.transform_feature_dict import transform_feature_dict
+from Preprocess.Features import Features
+from .Preprocess.preprocessing_tweets import load_dataset
+from .Preprocess.transform_feature_dict import transform_feature_dict
 
 from keras.preprocessing.sequence import pad_sequences
 
@@ -78,8 +78,8 @@ def prep_pipeline(data_path, dataset, output_path, metacontext_path, feature_set
 if __name__ == '__main__':
     parser = argparse.ArgumentParser('HearSay Preprocessing')
     parser.add_argument('--input', '-i', help='folder for training data', default="Data")
-    parser.add_argument('--metacontext', '-m', help="hydrated twitter data folder")
     parser.add_argument('--dataset', '-d', help='name of dataset', default="")
+    parser.add_argument('--metacontext', '-m', help="hydrated twitter data folder")
     parser.add_argument('--output', '-o', help='destination for files', default="")
 
     features = [

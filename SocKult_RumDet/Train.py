@@ -64,9 +64,9 @@ if __name__ == '__main__':
     parser.add_argument('--log_name', 'ln', help="Name for logging folder")
 
     train(
-        data_path=parser.input, 
+        data_path = parser.input, 
         params_path = parser.params, 
-        log_path=parser.log, 
-        log_name=parser.log_folder
+        log_path = parser.log, 
+        log_name = parser.log_folder
         )
     
