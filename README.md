@@ -16,7 +16,7 @@ To install and use the training and inference scripts please clone the repo and 
 ```bash
 git clone https://github.com/saxogrammaticus/HearSay.git
 cd HearSay
-pip install -r SocKult_RumDet/requirements.txt
+pip install -r ./requirements.txt
 ```
 
 ## Data Preparation
