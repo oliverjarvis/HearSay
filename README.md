@@ -28,7 +28,8 @@ The data required to reproduce this demo is avaiable at the link above. Please f
 4. Delete so you are left with only your dataset folder “twitter-english”, and your json files
 5. Extract the ids from the three json files, save them in separate newline separated txt files and hydrate them. Don't forget to remove the reddit ids.
 6. Save the hydrated tweets as csv and run the csv preprocessing script ‘csv_wrangler.py’
-7. remove the csv files not ending in 'clean.csv'
+7. Remove the csv files not ending in 'clean.csv'
+8. All files should be in Data folder in the main HearSay directory
 
 The final directory  structure should look something like so:
 
