@@ -2,6 +2,8 @@
 
 A GitHub repository for the Social and Cultural Dynamics Exam Paper.
 
+A collaboration between @saxogrammaticus and @maltehb
+
 Contains code to reproduce results.
 
 To download the data follow this link: https://competitions.codalab.org/competitions/19938
