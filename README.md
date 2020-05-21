@@ -2,7 +2,7 @@
 
 A GitHub repository for the Social and Cultural Dynamics Exam Paper.
 
-A collaboration between @saxogrammaticus and @maltehb
+A collaboration between [@saxogrammaticus](https://github.com/saxogrammaticus) and [@maltehb](https://github.com/maltehb)
 
 Contains code to reproduce results.
 
