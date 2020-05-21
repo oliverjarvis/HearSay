@@ -90,7 +90,7 @@ log_path | `str` | `"logs"` | Path for logging data
 log_name | `str` | `"log"` | Name for logging folder
 
 To replicate our results run script with HPsearch set to true.
-NB. Hyperparameter search alone took 18 hours on an NVIDIA Tesla K80 GPU with 12 GiB. 
+NB. Hyperparameter search alone took 14 hours on an NVIDIA Tesla K80 GPU with 12 GiB. 
     Training once best Hparams were found, took an additional 4 hours.
 ```bash
 python ./Train.py --input "outdata" --HPsearch
